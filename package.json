@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "dotenv": "^16.4.7",
+    "eslint": "^9.17.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "winax": "^3.6.1"
+  }
+}
