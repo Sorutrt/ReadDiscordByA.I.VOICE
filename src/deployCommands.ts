@@ -1,11 +1,13 @@
 import { REST, Routes } from 'discord.js';
 import dotenv from 'dotenv';
 import { data } from './commands/rand';
+import { joinCommandData } from './commands/join';
 
 dotenv.config();
 
 const commands: any[] = [
-    data.toJSON()
+    data.toJSON(),
+    joinCommandData.toJSON()
 ];
 
 const rest = new REST().setToken(process.env.TOKEN!); // TOKENがundifinedの可能性はないとして!をつける

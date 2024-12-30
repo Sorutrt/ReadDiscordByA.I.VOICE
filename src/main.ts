@@ -2,6 +2,7 @@
 import { GatewayIntentBits, Client, Partials, Message, Events, CacheType, Interaction } from "discord.js";
 import dotenv from "dotenv";
 import { data, rand } from "./commands/rand";
+import { joinCommandData, joinVC } from "./commands/join";
 
 //.envファイルを読み込む
 dotenv.config()
@@ -50,6 +51,15 @@ client.on(Events.InteractionCreate, async (interaction: Interaction<CacheType>) 
           console.log('main.ts error')
           console.error(e);
       }
+  }
+  else if (commandName === joinCommandData.name) {
+    try {
+      await joinVC(interaction);
+    }
+    catch(e) {
+      console.log('エラーが発生しました')
+      console.error(e);
+    }
   }
 })
 
