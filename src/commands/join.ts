@@ -1,5 +1,5 @@
 import { Interaction, SlashCommandBuilder, GuildMember } from "discord.js";
-import { joinVoiceChannel, DiscordGatewayAdapterCreator } from "@discordjs/voice";
+import { joinVoiceChannel } from "@discordjs/voice";
 import dotenv from "dotenv";
 
 // .envファイルを読み込む
@@ -26,7 +26,6 @@ export async function joinVC(interaction: Interaction) {
 
   // ユーザーがボイスチャンネルに参加しているか確認
   const voiceChannel = member.voice.channel;
-  
   if (!voiceChannel) {
     await interaction.reply("ボイスチャンネルに参加してから再度試してください。");
     return;
@@ -36,8 +35,8 @@ export async function joinVC(interaction: Interaction) {
     // ボイスチャンネルに接続
     joinVoiceChannel({
       channelId: voiceChannel.id,
-      guildId: guild.id,
-      adapterCreator: guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
+      guildId: voiceChannel.guild.id,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
 
     await interaction.reply(`${voiceChannel.name} チャンネルに接続しました！`);

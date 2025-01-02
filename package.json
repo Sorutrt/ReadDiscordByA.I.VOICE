@@ -16,8 +16,9 @@
   "type": "module",
   "scripts": {
     "test": "tsx ./src/main.ts",
-    "start": "node build/main.js",
+    "start": "node ./dist/main.js",
     "compile": "tsc -p .",
+    "debug": "node inspect ./dist/main.js",
     "newcommand": "npx tsx ./src/deploy-commands.ts"
   }
 }
