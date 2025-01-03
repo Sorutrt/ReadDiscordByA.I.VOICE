@@ -2,7 +2,7 @@
 import { GatewayIntentBits, Client, Partials, Message, Events, CacheType, Interaction } from "discord.js";
 import dotenv from "dotenv";
 import { joinCommandData, joinVC } from "./commands/join";
-//import { talk } from "./talk";
+import { textToSaveWav } from "./aivoice";
 import { createAudioPlayer, createAudioResource, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import fs from "fs"
 import path from "path"
@@ -14,6 +14,7 @@ dotenv.config()
 // ESM環境に合わせて定義する
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const __savedWavDir = path.resolve(__dirname, "../voice/")
 
 
 //Botで使うGatewayIntents、partials
@@ -31,14 +32,27 @@ const client = new Client({
 
 //Botがきちんと起動したか確認
 client.once('ready', () => {
-    console.log('Ready!')
-    if(client.user){
-        console.log(client.user.tag)
-    }
+  // 既存のWav削除
+  try {
+    const savedWavList = fs.readdirSync(__savedWavDir)
+    savedWavList.forEach( (file) => {
+      fs.rm(path.resolve(__savedWavDir, file), () => {})
+    })
+  } catch (e) {
+    console.log(e);
+  }
+
+  // Ready!!
+  console.log('Ready!')
+  if(client.user){
+      console.log(client.user.tag)
+  }
 })
 
 
 const audioPlayer = createAudioPlayer();
+
+
 // メッセージ送ると喋る
 client.on('messageCreate', async (message: Message) => {
   if (message.author.bot) return;
@@ -46,12 +60,17 @@ client.on('messageCreate', async (message: Message) => {
   // VC接続確認
   const connection = getVoiceConnection(message.guild!.id);
   if (!connection) {
-    // message.reply("ボットは現在どのボイスチャンネルにも接続していません。");
     return;
   }
 
+  // 音声生成
+  await textToSaveWav(message.content, __savedWavDir);
+
   // 音声ファイルのパスとその確認
-  const audioFilePath = path.resolve(__dirname, "../voice/2.wav");
+  const wavFilePath: string | undefined = fs.readdirSync(__savedWavDir).filter((filename) => filename.includes(`${message.content}.wav`))[0]; // A.I.VOICEの命名規則で最後に{Text}をつける！
+  if (typeof wavFilePath === "string") console.log(`対象のwavファイル: ${wavFilePath}`);
+
+  const audioFilePath = path.resolve(__savedWavDir, wavFilePath);
   if (!fs.existsSync(audioFilePath)) {
     message.reply("音声ファイルが見つかりません。");
     console.error("音声ファイルが見つかりません: " + audioFilePath);
@@ -65,12 +84,13 @@ client.on('messageCreate', async (message: Message) => {
   connection.subscribe(audioPlayer);
   audioPlayer.play(resource);
 
-  console.log("Connection state:", connection.state.status);
-  console.log("Audio player state:", audioPlayer.state.status);
+  // console.log("Connection state:", connection.state.status);
+  // console.log("Audio player state:", audioPlayer.state.status);
 
-  message.reply("音声を再生します！");
 });
 
+
+// 音声再生に関するログメッセージ
 audioPlayer.on(AudioPlayerStatus.Playing, () => {
   console.log("音声を再生しています...");
 });
@@ -95,7 +115,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction<CacheType>) 
 
   if (commandName === joinCommandData.name) {
     try {
-      await joinVC(interaction);
+      joinVC(interaction);
     }
     catch(e) {
       console.log('エラーが発生しました')
