@@ -16,6 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __savedWavDir = path.resolve(__dirname, "../voice/")
 
+const permittedUsersId: string[] = process.env.PERMITTED_USERS!.split(",")
 
 //Botで使うGatewayIntents、partials
 const client = new Client({
@@ -55,7 +56,8 @@ const audioPlayer = createAudioPlayer();
 
 // メッセージ送ると喋る
 client.on('messageCreate', async (message: Message) => {
-  if (message.author.bot) return;
+
+  if (message.author.bot || !permittedUsersId.includes(message.author.id)) return;
 
   // VC接続確認
   const connection = getVoiceConnection(message.guild!.id);
