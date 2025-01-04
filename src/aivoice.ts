@@ -30,7 +30,7 @@ export async function textToSaveWav(talkContent: string, savePath: string): Prom
   try {
     console.log(ttsControl.Status)
     if(ttsControl.Status===HostStatus.NotRunning){
-      ttsControl.StartHost();
+      await ttsControl.StartHost();
     }
     if (ttsControl.Status===HostStatus.NotConnected){
       ttsControl.Connect();
