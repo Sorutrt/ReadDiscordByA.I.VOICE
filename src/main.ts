@@ -67,10 +67,16 @@ client.on('messageCreate', async (message: Message) => {
   await textToSaveWav(message.content, __savedWavDir);
 
   // 音声ファイルのパスとその確認
-  const wavFilePath: string | undefined = fs.readdirSync(__savedWavDir).filter((filename) => filename.includes(`${message.content}.wav`))[0]; // A.I.VOICEの命名規則で最後に{Text}をつける！
-  if (typeof wavFilePath === "string") console.log(`対象のwavファイル: ${wavFilePath}`);
+  const serchFileName = message.content.slice(0,10) + ".wav";
+  const wavFileName: string | undefined = fs.readdirSync(__savedWavDir).filter((filename) => filename.includes(serchFileName))[0]; // A.I.VOICEの命名規則で最後に{Text}をつける！
+  if (typeof wavFileName === "undefined") {
+    console.log ("wavが見つかりませんでした");
+    console.log(`探そうとした名前: ${serchFileName}`);
+    message.reply(`内部で生成されたwavが見つかりませんでした`);
+    return;
+  }
 
-  const audioFilePath = path.resolve(__savedWavDir, wavFilePath);
+  const audioFilePath = path.resolve(__savedWavDir, wavFileName);
   if (!fs.existsSync(audioFilePath)) {
     message.reply("音声ファイルが見つかりません。");
     console.error("音声ファイルが見つかりません: " + audioFilePath);
